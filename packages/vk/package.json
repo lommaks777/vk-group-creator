@@ -1,0 +1,24 @@
+{
+  "name": "@vk-group-creator/vk",
+  "version": "1.0.0",
+  "description": "VK API SDK for group creation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "form-data": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8"
+  }
+}

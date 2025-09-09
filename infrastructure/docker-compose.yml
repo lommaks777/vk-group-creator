@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: vk-group-creator-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: vk-group-creator-postgres
+    environment:
+      POSTGRES_DB: vk_group_creator
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  server:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.server
+    container_name: vk-group-creator-server
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vk_group_creator
+      REDIS_URL: redis://redis:6379
+      VK_CLIENT_ID: ${VK_CLIENT_ID}
+      VK_CLIENT_SECRET: ${VK_CLIENT_SECRET}
+      VK_REDIRECT_URI: ${VK_REDIRECT_URI}
+      JWT_SECRET: ${JWT_SECRET}
+      COOKIE_SECRET: ${COOKIE_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    ports:
+      - "3001:3001"
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+    volumes:
+      - ./uploads:/app/uploads
+
+  web:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.web
+    container_name: vk-group-creator-web
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  postgres_data:

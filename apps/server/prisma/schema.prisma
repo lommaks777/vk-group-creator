@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id            String   @id @default(cuid())
+  name          String
+  city          String
+  area          String
+  phone         String
+  telegram      String?
+  techniques    String[] // JSON array
+  pricing       Json     // JSON array of pricing objects
+  is_home_visit Boolean
+  address       String?
+  vk_token      String   // Encrypted VK access token
+  vk_user_id    Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  groups Group[]
+
+  @@map("students")
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  studentId   String
+  vk_group_id Int?
+  screen_name String?
+  url         String?
+  status      String   @default("pending") // pending, in_progress, completed, failed, revoked
+  progress    Json     // Progress tracking object
+  result      Json?    // Final result object
+  error       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("groups")
+}
+
+model JobLog {
+  id        String   @id @default(cuid())
+  jobId     String
+  type      String   // group-creation, post-scheduling, etc.
+  status    String   // pending, processing, completed, failed
+  progress  Json?
+  result    Json?
+  error     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("job_logs")
+}
